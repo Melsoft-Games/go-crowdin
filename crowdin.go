@@ -56,7 +56,7 @@ func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*Files, error) {
 		map[string]string{
 			"language" : languageCode,
 			"json" : "",
-		})
+		}, nil)
 
 	if err != nil {
 		crowdin.log(err)

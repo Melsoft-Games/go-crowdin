@@ -6,28 +6,68 @@ import (
 	"net/http"
 	"time"
 	"log"
-	"net/url"
+	"io"
+	"os"
+	"bytes"
+	"mime/multipart"
 )
 
-func (crowdin *Crowdin) post(urlStr string, params map[string]string) ([]byte, error) {
+// params - extra params
+// fileNames - key = dir
+func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames map[string]string) ([]byte, error) {
 
-	form := url.Values{}
+	var buffer bytes.Buffer
+	writer := multipart.NewWriter(&buffer)
+
 	if params != nil {
 		for k, v := range params {
-			form.Add(k, v)
+			fw, err := writer.CreateFormField(k);
+			if err != nil {
+				return nil, err
+			}
+			if _, err = fw.Write([]byte(v)); err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	response, err := crowdin.config.client.PostForm(urlStr, form)
+	if fileNames != nil {
+		for key, filePath := range fileNames {
+
+			file, err := os.Open(filePath)
+			if err != nil {
+				return nil, err
+			}
+
+			defer file.Close()
+
+			fw, err := writer.CreateFormFile(key, filePath)
+			if err != nil {
+				return nil, err
+			}
+			if _, err = io.Copy(fw, file); err != nil {
+				return nil, err
+			}
+
+		}
+	}
+
+	writer.Close()
+
+	req, err := http.NewRequest("POST", urlStr, &buffer)
 	if err != nil {
-		crowdin.log(err)
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	response, err := crowdin.config.client.Do(req)
+	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		err = APIError{What: fmt.Sprintf("Status code: %v", response.StatusCode)}
-		crowdin.log(err)
 		return nil, err
 	}
 

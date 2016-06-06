@@ -33,7 +33,6 @@ func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames 
 
 	if fileNames != nil {
 		for key, filePath := range fileNames {
-
 			file, err := os.Open(filePath)
 			if err != nil {
 				return nil, err
@@ -66,15 +65,13 @@ func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames 
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		err = APIError{What: fmt.Sprintf("Status code: %v", response.StatusCode)}
+	bodyResponse, err := ioutil.ReadAll(response.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	bodyResponse, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		crowdin.log(err)
-		return nil, err
+	if response.StatusCode != http.StatusOK {
+		return bodyResponse, APIError{What: fmt.Sprintf("Status code: %v", response.StatusCode)}
 	}
 
 	return bodyResponse, nil

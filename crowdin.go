@@ -130,7 +130,7 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, erro
 }
 
 // UpdateFile - Upload latest version of your localization file to Crowdin
-func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseAddFile, error) {
+func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseGeneral, error) {
 
 	params := make(map[string]string)
 	params["json"] = ""
@@ -165,7 +165,34 @@ func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseAddFile
 		return nil, err
 	}
 
-	var responseAPI responseAddFile
+	var responseAPI responseGeneral
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+
+}
+
+// DeleteFile - Delete file from Crowdin project. All the translations will be lost without ability to restore them
+func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
+
+	params := make(map[string]string)
+	params["json"] = ""
+	params["file"] = fileName
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/delete-file?key=%v", crowdin.config.project, crowdin.config.token),
+		params,
+		nil)
+
+	if err != nil {
+		log.Println(string(response))
+		return nil, err
+	}
+
+	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
 		crowdin.log(err)

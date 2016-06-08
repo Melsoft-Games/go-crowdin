@@ -104,6 +104,6 @@ type responseAddFile struct {
 	} `json:"stats"`
 }
 
-type responseUpdateFile struct {
+type responseGeneral struct {
 	Success bool `json:"success"`
 }

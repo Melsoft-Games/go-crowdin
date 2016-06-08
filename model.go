@@ -1,33 +1,24 @@
 package crowdin
 
-type responseLanguageStatus struct {
-	Files []struct {
-		ID              string `json:"id"`
-		Name            string `json:"name"`
-		NodeType        string `json:"node_type"`
-		Phrases         string `json:"phrases"`
-		Translated      string `json:"translated"`
-		Approved        string `json:"approved"`
-		Words           string `json:"words"`
-		WordsTranslated string `json:"words_translated"`
-		WordsApproved   string `json:"words_approved"`
-	} `json:"files"`
-}
-
-type responseAddFile struct {
-	Success bool `json:"success"`
-	Stats   struct {
-				Files []struct {
-					FileID  int `json:"file_id"`
-					Name    string `json:"name"`
-					Strings int `json:"strings"`
-					Words   int `json:"words"`
-				} `json:"files"`
-			} `json:"stats"`
-}
-
 // Used for AddFile() API call
 type AddFileOptions struct {
+	// Note: Used only when uploading CSV (or XLS/XLSX) file to define data columns mapping.
+	// Acceptable value is the combination of the following constants:
+	// "identifier" — Column contains string identifier.
+	// "source_phrase" — Column contains only source string (in result string will contain same string).
+	// "source_or_translation" — Column contains source string but when exporting same column should contain translation (also when uploading existing translations, the value from this column will be used as a translated string).
+	// "translation" — Column contains translated string (when imported file already contains translations).
+	// "context" — Column contains some comments on source string. Context information.
+	// "max_length" — Column contains max. length of translation for this string.
+	// "none" — Do not import column.
+	Scheme string
+
+	// Used when uploading CSV (or XLS/XLSX) files via API. Defines whether first line should be imported or it contains columns headers. May not contain value.
+	FirstLineContainsHeader bool
+
+	// Files array that should be added to Crowdin project. Array keys should contain file names with path in Crowdin project.
+	Files map[string]string
+
 	// Acceptable values are:
 	// empty value or "auto" — Try to detect file type by extension or MIME type
 	// "gettext" — GNU GetText (*.po, *.pot)
@@ -65,8 +56,10 @@ type AddFileOptions struct {
 	// "haml" — Haml (*.haml)
 	// "arb" — Application Resource Bundle (*.arb)
 	// "vtt" — Video Subtitling and WebVTT (*.vtt)
-	Type                    string
+	Type string
+}
 
+type UpdateFileOptions struct {
 	// Note: Used only when uploading CSV (or XLS/XLSX) file to define data columns mapping.
 	// Acceptable value is the combination of the following constants:
 	// "identifier" — Column contains string identifier.
@@ -76,11 +69,41 @@ type AddFileOptions struct {
 	// "context" — Column contains some comments on source string. Context information.
 	// "max_length" — Column contains max. length of translation for this string.
 	// "none" — Do not import column.
-	Scheme                  string
+	Scheme string
 
 	// Used when uploading CSV (or XLS/XLSX) files via API. Defines whether first line should be imported or it contains columns headers. May not contain value.
 	FirstLineContainsHeader bool
 
 	// Files array that should be added to Crowdin project. Array keys should contain file names with path in Crowdin project.
-	Files                   map[string]string
+	Files map[string]string
+}
+
+type responseLanguageStatus struct {
+	Files []struct {
+		ID              string `json:"id"`
+		Name            string `json:"name"`
+		NodeType        string `json:"node_type"`
+		Phrases         string `json:"phrases"`
+		Translated      string `json:"translated"`
+		Approved        string `json:"approved"`
+		Words           string `json:"words"`
+		WordsTranslated string `json:"words_translated"`
+		WordsApproved   string `json:"words_approved"`
+	} `json:"files"`
+}
+
+type responseAddFile struct {
+	Success bool `json:"success"`
+	Stats   struct {
+		Files []struct {
+			FileID  int    `json:"file_id"`
+			Name    string `json:"name"`
+			Strings int    `json:"strings"`
+			Words   int    `json:"words"`
+		} `json:"files"`
+	} `json:"stats"`
+}
+
+type responseUpdateFile struct {
+	Success bool `json:"success"`
 }

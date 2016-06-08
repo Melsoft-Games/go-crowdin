@@ -1,30 +1,33 @@
 package crowdin
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
+
 	"github.com/mreiferson/go-httpclient"
-	"fmt"
-	"encoding/json"
-	"log"
 )
 
 var (
 	apiBaseURL = "https://api.crowdin.com/api/project/"
 )
 
+// Crowdin API wrapper
 type Crowdin struct {
-	config    struct {
-				  apiBaseURL string
-				  token      string
-				  project    string
-				  client     *http.Client
-			  }
+	config struct {
+		apiBaseURL string
+		token      string
+		project    string
+		client     *http.Client
+	}
 	debug     bool
 	logWriter io.Writer
 }
 
+// New - create new instance of Crowdin API.
 func New(token, project string) *Crowdin {
 
 	transport := &httpclient.Transport{
@@ -43,20 +46,20 @@ func New(token, project string) *Crowdin {
 	return s
 }
 
-// SetDebug traces errors if it's set to true.
+// SetDebug - traces errors if it's set to true.
 func (crowdin *Crowdin) SetDebug(debug bool, logWriter io.Writer) {
 	crowdin.debug = debug
 	crowdin.logWriter = logWriter
 }
 
-// Language Status - POST https://api.crowdin.com/api/project/{project-identifier}/language-status?key={project-key}
-func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*Files, error) {
-	var files Files
+// GetLanguageStatus - Get the detailed translation progress for specified language.
+// Language codes - https://crowdin.com/page/api/language-codes
+func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguageStatus, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL + "%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
 		map[string]string{
-			"language" : languageCode,
-			"json" : "",
+			"language": languageCode,
+			"json":     "",
 		}, nil)
 
 	if err != nil {
@@ -64,18 +67,19 @@ func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*Files, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(response, &files)
+	var responseAPI responseLanguageStatus
+	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
 		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
 
-	return &files, nil
+	return &responseAPI, nil
 }
 
-// Add File - POST https://api.crowdin.com/api/project/{project-identifier}/add-file?key={project-key}
-func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*ResponseAddFile, error) {
+// AddFile - Add new file to Crowdin project.
+func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, error) {
 
 	params := make(map[string]string)
 	params["json"] = ""
@@ -105,7 +109,7 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*ResponseAddFile, erro
 		}
 	}
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL + "%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
 		params,
 		files)
 
@@ -114,7 +118,7 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*ResponseAddFile, erro
 		return nil, err
 	}
 
-	var responseAPI ResponseAddFile
+	var responseAPI responseAddFile
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
 		crowdin.log(err)
@@ -124,4 +128,3 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*ResponseAddFile, erro
 	return &responseAPI, nil
 
 }
-

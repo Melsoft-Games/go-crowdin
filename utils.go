@@ -1,15 +1,15 @@
 package crowdin
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"time"
-	"log"
-	"io"
-	"os"
 	"bytes"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
 	"mime/multipart"
+	"net/http"
+	"os"
+	"time"
 )
 
 // params - extra params
@@ -21,7 +21,7 @@ func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames 
 
 	if params != nil {
 		for k, v := range params {
-			fw, err := writer.CreateFormField(k);
+			fw, err := writer.CreateFormField(k)
 			if err != nil {
 				return nil, err
 			}

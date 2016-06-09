@@ -245,3 +245,27 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 	return &responseAPI, nil
 
 }
+
+// GetTranslationsStatus - Track overall translation and proofreading progresses of each target language.
+func (crowdin *Crowdin) GetTranslationsStatus() ([]responseTranslationsStatus, error) {
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/status?key=%v", crowdin.config.project, crowdin.config.token),
+		map[string]string{
+			"json": "",
+		}, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI []responseTranslationsStatus
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return responseAPI, nil
+}

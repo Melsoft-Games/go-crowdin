@@ -125,6 +125,19 @@ type responseUploadTranslation struct {
 	} `json:"stats"`
 }
 
+type responseTranslationsStatus struct {
+	Name               string `json:"name"`
+	Code               string `json:"code"`
+	Phrases            string `json:"phrases"`
+	Translated         string `json:"translated"`
+	Approved           string `json:"approved"`
+	Words              string `json:"words"`
+	WordsTranslated    string `json:"words_translated"`
+	WordsApproved      string `json:"words_approved"`
+	TranslatedProgress int    `json:"translated_progress"`
+	ApprovedProgress   int    `json:"approved_progress"`
+}
+
 type responseGeneral struct {
 	Success bool `json:"success"`
 }

@@ -1,6 +1,6 @@
 package crowdin
 
-// Used for AddFile() API call
+// AddFileOptions used for AddFile() API call
 type AddFileOptions struct {
 	// Note: Used only when uploading CSV (or XLS/XLSX) file to define data columns mapping.
 	// Acceptable value is the combination of the following constants:
@@ -59,6 +59,7 @@ type AddFileOptions struct {
 	Type string
 }
 
+// UpdateFileOptions used for UpdateFile() API call
 type UpdateFileOptions struct {
 	// Note: Used only when uploading CSV (or XLS/XLSX) file to define data columns mapping.
 	// Acceptable value is the combination of the following constants:
@@ -125,7 +126,7 @@ type responseUploadTranslation struct {
 	} `json:"stats"`
 }
 
-type responseTranslationsStatus struct {
+type TranslationStatus struct {
 	Name               string `json:"name"`
 	Code               string `json:"code"`
 	Phrases            string `json:"phrases"`
@@ -136,6 +137,45 @@ type responseTranslationsStatus struct {
 	WordsApproved      string `json:"words_approved"`
 	TranslatedProgress int    `json:"translated_progress"`
 	ApprovedProgress   int    `json:"approved_progress"`
+}
+
+type ProjectInfo struct {
+	Files []struct {
+		Name         string `json:"name"`
+		NodeType     string `json:"node_type"`
+		Created      string `json:"created"`
+		LastUpdated  string `json:"last_updated"`
+		LastAccessed string `json:"last_accessed"`
+		LastRevision string `json:"last_revision"`
+	} `json:"files"`
+	Language struct {
+		Name         string `json:"name"`
+		Code         string `json:"code"`
+		CanTranslate int    `json:"can_translate"`
+		CanApprove   int    `json:"can_approve"`
+	}
+	Details struct {
+		SourceLanguage struct {
+			Name string `json:"name"`
+			Code string `json:"code"`
+		} `json:"source_language"`
+		Name                  string `json:"name"`
+		Identifier            string `json:"identifier"`
+		Created               string `json:"created"`
+		Description           string `json:"description"`
+		JoinPolicy            string `json:"private"`
+		LastBuild             string `json:"last_build"`
+		LastActivity          string `json:"last_activity"`
+		ParticipantsCount     string `json:"participants_count"`
+		TotalStringsCount     string `json:"total_strings_count"`
+		TotalWordsCount       string `json:"total_words_count"`
+		DuplicateStringsCount int    `json:"duplicate_strings_count"`
+		DuplicateWordsCount   int    `json:"duplicate_words_count"`
+		InviteURL             struct {
+			Translator  string `json:"translator"`
+			Proofreader string `json:"proofreader"`
+		} `json:"invite_url"`
+	} `json:"details"`
 }
 
 type responseGeneral struct {

@@ -57,3 +57,11 @@ api.SetClient(client)
 ```
 
 [Documentation](https://godoc.org/github.com/medisafe/go-crowdin)
+
+##### Author
+
+Roman Kushnarenko - [sromku](https://github.com/sromku)
+
+##### License 
+
+Apache License 2.0

@@ -202,3 +202,46 @@ func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
 	return &responseAPI, nil
 
 }
+
+// UpdateFile - Upload latest version of your localization file to Crowdin
+func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (*responseUploadTranslation, error) {
+
+	params := make(map[string]string)
+	params["json"] = ""
+
+	if options != nil {
+
+		if options.Language != "" {
+			params["language"] = options.Language
+		}
+
+		params["import_duplicates"] = options.ImportDuplicates
+
+	}
+
+	files := make(map[string]string)
+	if options != nil && options.Files != nil {
+		for k, path := range options.Files {
+			files[fmt.Sprintf("files[%v]", k)] = path
+		}
+	}
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/upload-translation?key=%v", crowdin.config.project, crowdin.config.token),
+		params,
+		files)
+
+	if err != nil {
+		log.Println(string(response))
+		return nil, err
+	}
+
+	var responseAPI responseUploadTranslation
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+
+}

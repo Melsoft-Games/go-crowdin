@@ -78,6 +78,17 @@ type UpdateFileOptions struct {
 	Files map[string]string
 }
 
+type UploadTranslationsOptions struct {
+	// Target language. With a single call it's possible to upload translations for several files but only into one of the languages.
+	Language string
+
+	// Translated files array. Array keys should contain file names in Crowdin.
+	Files map[string]string
+
+	// Defines whether to add translation if there is the same translation previously added. Acceptable values are: 0 or 1. Default is 0.
+	ImportDuplicates string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`
@@ -100,6 +111,16 @@ type responseAddFile struct {
 			Name    string `json:"name"`
 			Strings int    `json:"strings"`
 			Words   int    `json:"words"`
+		} `json:"files"`
+	} `json:"stats"`
+}
+
+type responseUploadTranslation struct {
+	Success bool `json:"success"`
+	Stats   struct {
+		Files []struct {
+			Name   string `json:"name"`
+			Status string `json:"status"`
 		} `json:"files"`
 	} `json:"stats"`
 }

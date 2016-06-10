@@ -355,12 +355,33 @@ func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*A
 //func (crowdin *Crowdin) DeleteProject() (error) {
 //	// TODO
 //}
-//
-//// AddDirectory - Add directory to Crowdin project.
-//func (crowdin *Crowdin) AddDirectory() (error) {
-//	// TODO
-//}
-//
+
+// AddDirectory - Add directory to Crowdin project.
+// name - Directory name (with path if nested directory should be created).
+func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, error) {
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/add-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		map[string]string{
+			"name": directoryName,
+			"json": "",
+		}, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseGeneral
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 //// ChangeDirectory - Rename directory or modify its attributes. When renaming directory the path can not be changed (it means new_name parameter can not contain path, name only).
 //func (crowdin *Crowdin) ChangeDirectory() (error) {
 //	// TODO

@@ -19,15 +19,19 @@ type postOptions struct {
 	files       map[string]string
 }
 
+type getOptions struct {
+	urlStr string
+}
+
 // params - extra params
 // fileNames - key = dir
-func (crowdin *Crowdin) post(postOptions *postOptions) ([]byte, error) {
+func (crowdin *Crowdin) post(options *postOptions) ([]byte, error) {
 
 	var buffer bytes.Buffer
 	writer := multipart.NewWriter(&buffer)
 
-	if postOptions.params != nil {
-		for k, v := range postOptions.params {
+	if options.params != nil {
+		for k, v := range options.params {
 			fw, err := writer.CreateFormField(k)
 			if err != nil {
 				return nil, err
@@ -38,8 +42,8 @@ func (crowdin *Crowdin) post(postOptions *postOptions) ([]byte, error) {
 		}
 	}
 
-	if postOptions.paramsArray != nil {
-		for k, arr := range postOptions.paramsArray {
+	if options.paramsArray != nil {
+		for k, arr := range options.paramsArray {
 			for _, v := range arr {
 				fw, err := writer.CreateFormField(k)
 				if err != nil {
@@ -52,8 +56,8 @@ func (crowdin *Crowdin) post(postOptions *postOptions) ([]byte, error) {
 		}
 	}
 
-	if postOptions.files != nil {
-		for key, filePath := range postOptions.files {
+	if options.files != nil {
+		for key, filePath := range options.files {
 			file, err := os.Open(filePath)
 			if err != nil {
 				return nil, err
@@ -74,12 +78,37 @@ func (crowdin *Crowdin) post(postOptions *postOptions) ([]byte, error) {
 
 	writer.Close()
 
-	req, err := http.NewRequest("POST", postOptions.urlStr, &buffer)
+	req, err := http.NewRequest("POST", options.urlStr, &buffer)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	response, err := crowdin.config.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	bodyResponse, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return bodyResponse, APIError{What: fmt.Sprintf("Status code: %v", response.StatusCode)}
+	}
+
+	return bodyResponse, nil
+}
+
+func (crowdin *Crowdin) get(options *getOptions) ([]byte, error) {
+
+	req, err := http.NewRequest("GET", options.urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	response, err := crowdin.config.client.Do(req)
 	if err != nil {
 		return nil, err

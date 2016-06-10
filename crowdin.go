@@ -329,11 +329,29 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 //func (crowdin *Crowdin) ExportFile() (error) {
 //	// TODO
 //}
-//
-//// ExportTranslations - Build ZIP archive with the latest translations. Please note that this method can be invoked only once per 30 minutes (there is no such restriction for organization plans). Also API call will be ignored if there were no changes in the project since previous export. You can see whether ZIP archive with latest translations was actually build by status attribute ("built" or "skipped") returned in response.
-//func (crowdin *Crowdin) ExportTranslations() (error) {
-//	// TODO
-//}
+
+// ExportTranslations - Build ZIP archive with the latest translations. Please note that this method can be invoked only once per 30 minutes (there is no such restriction for organization plans). Also API call will be ignored if there were no changes in the project since previous export. You can see whether ZIP archive with latest translations was actually build by status attribute ("built" or "skipped") returned in response.
+func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error) {
+
+	response, err := crowdin.get(&getOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/export?key=%v&json=", crowdin.config.project, crowdin.config.token),
+	})
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseExportTranslations
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
 
 // AccountProjects - Get Crowdin Project details.
 func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*AccountDetails, error) {
@@ -468,8 +486,8 @@ func (crowdin *Crowdin) DeleteProject() (*responseDeleteProject, error) {
 	params["json"] = ""
 
 	response, err := crowdin.post(&postOptions{
-		urlStr:      fmt.Sprintf(apiBaseURL+"%v/delete-project?key=%v", crowdin.config.project, crowdin.config.token),
-		params:      params,
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-project?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
 	})
 
 	if err != nil {

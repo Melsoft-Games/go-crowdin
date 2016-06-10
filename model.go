@@ -180,6 +180,12 @@ type responseDeleteProject struct {
 	} `json:"project"`
 }
 
+type responseExportTranslations struct {
+	Success struct {
+		Status string `json:"status"`
+	} `json:"success"`
+}
+
 type TranslationStatus struct {
 	Name               string `json:"name"`
 	Code               string `json:"code"`

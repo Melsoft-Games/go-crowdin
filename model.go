@@ -90,6 +90,17 @@ type UploadTranslationsOptions struct {
 	ImportDuplicates string
 }
 
+type ChangeDirectoryOptions struct {
+	// Full directory path that should be modified (e.g. /MainPage/AboutUs).
+	Name string
+
+	// New directory name.
+	NewName string
+
+	// New directory title to be displayed in Crowdin UI.
+	Title string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`

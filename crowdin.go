@@ -382,11 +382,46 @@ func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, er
 	return &responseAPI, nil
 }
 
-//// ChangeDirectory - Rename directory or modify its attributes. When renaming directory the path can not be changed (it means new_name parameter can not contain path, name only).
-//func (crowdin *Crowdin) ChangeDirectory() (error) {
-//	// TODO
-//}
-//
+// ChangeDirectory - Rename directory or modify its attributes. When renaming directory the path can not be changed (it means new_name parameter can not contain path, name only).
+func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*responseGeneral, error) {
+
+	params := make(map[string]string)
+	params["json"]=""
+
+	if options != nil {
+
+		if options.Name != "" {
+			params["name"] = options.Name
+		}
+
+		if options.NewName != "" {
+			params["new_name"] = options.NewName
+		}
+
+		if options.Title != "" {
+			params["title"] = options.Title
+		}
+	}
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/change-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		params, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseGeneral
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 //// DeleteDirectory - Delete Crowdin project directory. All nested files and directories will be deleted too.
 //func (crowdin *Crowdin) DeleteDirectory() (error) {
 //	// TODO

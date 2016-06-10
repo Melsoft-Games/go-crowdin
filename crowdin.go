@@ -422,11 +422,32 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 	return &responseAPI, nil
 }
 
-//// DeleteDirectory - Delete Crowdin project directory. All nested files and directories will be deleted too.
-//func (crowdin *Crowdin) DeleteDirectory() (error) {
-//	// TODO
-//}
-//
+// DeleteDirectory - Delete Crowdin project directory. All nested files and directories will be deleted too.
+// name - Directory name (with path if nested directory should be created).
+func (crowdin *Crowdin) DeleteDirectory(directoryName string) (*responseGeneral, error) {
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/delete-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		map[string]string{
+			"name": directoryName,
+			"json": "",
+		}, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseGeneral
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 //// DownloadGlossary - Download Crowdin project glossaries as TBX file.
 //func (crowdin *Crowdin) DownloadGlossary() (error) {
 //	// TODO

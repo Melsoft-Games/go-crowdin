@@ -47,6 +47,13 @@ func New(token, project string) *Crowdin {
 	return s
 }
 
+// SetProject set project details
+func (crowdin *Crowdin) SetProject(token, project string) *Crowdin {
+	crowdin.config.token = token
+	crowdin.config.project = project
+	return crowdin
+}
+
 // SetDebug - traces errors if it's set to true.
 func (crowdin *Crowdin) SetDebug(debug bool, logWriter io.Writer) {
 	crowdin.debug = debug
@@ -454,11 +461,32 @@ func (crowdin *Crowdin) EditProject(options *EditProjectOptions) (*responseManag
 	return &responseAPI, nil
 }
 
-//
-//// DeleteProject - Delete Crowdin project with all translations.
-//func (crowdin *Crowdin) DeleteProject() (error) {
-//	// TODO
-//}
+// DeleteProject - Delete Crowdin project with all translations.
+func (crowdin *Crowdin) DeleteProject() (*responseDeleteProject, error) {
+
+	params := make(map[string]string)
+	params["json"] = ""
+
+	response, err := crowdin.post(&postOptions{
+		urlStr:      fmt.Sprintf(apiBaseURL+"%v/delete-project?key=%v", crowdin.config.project, crowdin.config.token),
+		params:      params,
+	})
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseDeleteProject
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
 
 // AddDirectory - Add directory to Crowdin project.
 // name - Directory name (with path if nested directory should be created).

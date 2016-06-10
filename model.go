@@ -174,6 +174,12 @@ type responseManageProject struct {
 	} `json:"project"`
 }
 
+type responseDeleteProject struct {
+	Project struct {
+		Success bool `json:"success"`
+	} `json:"project"`
+}
+
 type TranslationStatus struct {
 	Name               string `json:"name"`
 	Code               string `json:"code"`

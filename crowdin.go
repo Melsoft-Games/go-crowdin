@@ -356,7 +356,7 @@ func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*A
 }
 
 // CreateProject - Create Crowdin project.
-func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options *CreateProjectOptions) (*responseGeneral, error) {
+func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options *CreateProjectOptions) (*responseManageProject, error) {
 
 	params := make(map[string]string)
 	params["json"] = ""
@@ -393,14 +393,12 @@ func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options 
 		paramsArray: paramsArray,
 	})
 
-	log.Println(string(response))
-
 	if err != nil {
 		crowdin.log(err)
 		return nil, err
 	}
 
-	var responseAPI responseGeneral
+	var responseAPI responseManageProject
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
 		log.Println(string(response))
@@ -411,11 +409,51 @@ func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options 
 	return &responseAPI, nil
 }
 
-//
-//// EditProject - Edit Crowdin project.
-//func (crowdin *Crowdin) EditProject() (error) {
-//	// TODO
-//}
+// EditProject - Edit Crowdin project.
+func (crowdin *Crowdin) EditProject(options *EditProjectOptions) (*responseManageProject, error) {
+
+	params := make(map[string]string)
+	params["json"] = ""
+
+	paramsArray := make(map[string][]string)
+
+	if options != nil {
+
+		if options.Name != "" {
+			params["name"] = options.Name
+		}
+
+		if options.JoinPolicy != "" {
+			params["join_policy"] = options.JoinPolicy
+		}
+
+		if options.Languages != nil {
+			paramsArray["languages[]"] = options.Languages
+		}
+	}
+
+	response, err := crowdin.post(&postOptions{
+		urlStr:      fmt.Sprintf(apiBaseURL+"%v/edit-project?key=%v", crowdin.config.project, crowdin.config.token),
+		params:      params,
+		paramsArray: paramsArray,
+	})
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseManageProject
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 //
 //// DeleteProject - Delete Crowdin project with all translations.
 //func (crowdin *Crowdin) DeleteProject() (error) {

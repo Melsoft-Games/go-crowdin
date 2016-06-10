@@ -118,6 +118,17 @@ type CreateProjectOptions struct {
 	JoinPolicy string
 }
 
+type EditProjectOptions struct {
+	// Project name.
+	Name string
+
+	// An array of language codes project should be translate to.
+	Languages []string
+
+	// Project join policy. Acceptable values are: open, private
+	JoinPolicy string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`
@@ -152,6 +163,15 @@ type responseUploadTranslation struct {
 			Status string `json:"status"`
 		} `json:"files"`
 	} `json:"stats"`
+}
+
+type responseManageProject struct {
+	Project struct {
+		Success    bool   `json:"success"`
+		Invitation string `json:"invitation"`
+		URL        string `json:"url"`
+		Key        string `json:"key"`
+	} `json:"project"`
 }
 
 type TranslationStatus struct {

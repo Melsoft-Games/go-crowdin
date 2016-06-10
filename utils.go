@@ -12,15 +12,22 @@ import (
 	"time"
 )
 
+type postOptions struct {
+	urlStr      string
+	params      map[string]string
+	paramsArray map[string][]string
+	files       map[string]string
+}
+
 // params - extra params
 // fileNames - key = dir
-func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames map[string]string) ([]byte, error) {
+func (crowdin *Crowdin) post(postOptions *postOptions) ([]byte, error) {
 
 	var buffer bytes.Buffer
 	writer := multipart.NewWriter(&buffer)
 
-	if params != nil {
-		for k, v := range params {
+	if postOptions.params != nil {
+		for k, v := range postOptions.params {
 			fw, err := writer.CreateFormField(k)
 			if err != nil {
 				return nil, err
@@ -31,8 +38,22 @@ func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames 
 		}
 	}
 
-	if fileNames != nil {
-		for key, filePath := range fileNames {
+	if postOptions.paramsArray != nil {
+		for k, arr := range postOptions.paramsArray {
+			for _, v := range arr {
+				fw, err := writer.CreateFormField(k)
+				if err != nil {
+					return nil, err
+				}
+				if _, err = fw.Write([]byte(v)); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	if postOptions.files != nil {
+		for key, filePath := range postOptions.files {
 			file, err := os.Open(filePath)
 			if err != nil {
 				return nil, err
@@ -53,7 +74,7 @@ func (crowdin *Crowdin) post(urlStr string, params map[string]string, fileNames 
 
 	writer.Close()
 
-	req, err := http.NewRequest("POST", urlStr, &buffer)
+	req, err := http.NewRequest("POST", postOptions.urlStr, &buffer)
 	if err != nil {
 		return nil, err
 	}

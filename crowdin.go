@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	apiBaseURL = "https://api.crowdin.com/api/project/"
+	apiBaseURL        = "https://api.crowdin.com/api/project/"
 	apiAccountBaseURL = "https://api.crowdin.com/api/account/"
 )
 
@@ -58,7 +58,6 @@ func (crowdin *Crowdin) SetClient(client *http.Client) {
 	crowdin.config.client = client
 }
 
-
 // AddFile - Add new file to Crowdin project.
 func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, error) {
 
@@ -90,9 +89,11 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, erro
 		}
 	}
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
-		params,
-		files)
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+		files:  files,
+	})
 
 	if err != nil {
 		log.Println(string(response))
@@ -137,9 +138,11 @@ func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseGeneral
 		}
 	}
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/update-file?key=%v", crowdin.config.project, crowdin.config.token),
-		params,
-		files)
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/update-file?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+		files:  files,
+	})
 
 	if err != nil {
 		log.Println(string(response))
@@ -164,9 +167,10 @@ func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
 	params["json"] = ""
 	params["file"] = fileName
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/delete-file?key=%v", crowdin.config.project, crowdin.config.token),
-		params,
-		nil)
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-file?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+	})
 
 	if err != nil {
 		log.Println(string(response))
@@ -207,9 +211,11 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 		}
 	}
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/upload-translation?key=%v", crowdin.config.project, crowdin.config.token),
-		params,
-		files)
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/upload-translation?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+		files:  files,
+	})
 
 	if err != nil {
 		log.Println(string(response))
@@ -230,10 +236,12 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 // GetTranslationsStatus - Track overall translation and proofreading progresses of each target language
 func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/status?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/status?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
 			"json": "",
-		}, nil)
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -255,11 +263,13 @@ func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 // Language codes - https://crowdin.com/page/api/language-codes
 func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguageStatus, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
 			"language": languageCode,
 			"json":     "",
-		}, nil)
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -280,10 +290,12 @@ func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguag
 // GetProjectDetails - Get Crowdin Project details
 func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/info?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/info?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
 			"json": "",
-		}, nil)
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -319,11 +331,13 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 // AccountProjects - Get Crowdin Project details.
 func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*AccountDetails, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiAccountBaseURL+"get-projects?account-key=%v", accountKey),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiAccountBaseURL+"get-projects?account-key=%v", accountKey),
+		params: map[string]string{
 			"login": loginUsername,
-			"json": "",
-		}, nil)
+			"json":  "",
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -341,10 +355,62 @@ func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*A
 	return &responseAPI, nil
 }
 
-//// CreateProject - Create Crowdin project.
-//func (crowdin *Crowdin) CreateProject() (error) {
-//	// TODO
-//}
+// CreateProject - Create Crowdin project.
+func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options *CreateProjectOptions) (*responseGeneral, error) {
+
+	params := make(map[string]string)
+	params["json"] = ""
+	params["login"] = loginUsername
+
+	paramsArray := make(map[string][]string)
+
+	if options != nil {
+
+		if options.Name != "" {
+			params["name"] = options.Name
+		}
+
+		if options.Identifier != "" {
+			params["identifier"] = options.Identifier
+		}
+
+		if options.SourceLanguage != "" {
+			params["source_language"] = options.SourceLanguage
+		}
+
+		if options.JoinPolicy != "" {
+			params["join_policy"] = options.JoinPolicy
+		}
+
+		if options.Languages != nil {
+			paramsArray["languages[]"] = options.Languages
+		}
+	}
+
+	response, err := crowdin.post(&postOptions{
+		urlStr:      fmt.Sprintf(apiAccountBaseURL+"create-project?account-key=%v", accountKey),
+		params:      params,
+		paramsArray: paramsArray,
+	})
+
+	log.Println(string(response))
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseGeneral
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 //
 //// EditProject - Edit Crowdin project.
 //func (crowdin *Crowdin) EditProject() (error) {
@@ -360,11 +426,13 @@ func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*A
 // name - Directory name (with path if nested directory should be created).
 func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/add-directory?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/add-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
 			"name": directoryName,
 			"json": "",
-		}, nil)
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -386,7 +454,7 @@ func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, er
 func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*responseGeneral, error) {
 
 	params := make(map[string]string)
-	params["json"]=""
+	params["json"] = ""
 
 	if options != nil {
 
@@ -403,8 +471,10 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 		}
 	}
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/change-directory?key=%v", crowdin.config.project, crowdin.config.token),
-		params, nil)
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/change-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+	})
 
 	if err != nil {
 		crowdin.log(err)
@@ -426,11 +496,13 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 // name - Directory name (with path if nested directory should be created).
 func (crowdin *Crowdin) DeleteDirectory(directoryName string) (*responseGeneral, error) {
 
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/delete-directory?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
 			"name": directoryName,
 			"json": "",
-		}, nil)
+		},
+	})
 
 	if err != nil {
 		crowdin.log(err)

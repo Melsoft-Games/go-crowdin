@@ -101,6 +101,23 @@ type ChangeDirectoryOptions struct {
 	Title string
 }
 
+type CreateProjectOptions struct {
+	// Project name.
+	Name string
+
+	// Project identifier. Should be unique among other Crowdin projects.
+	Identifier string
+
+	// Source files language. Should be a two letters language code.
+	SourceLanguage string
+
+	// An array of language codes project should be translate to.
+	Languages []string
+
+	// Project join policy. Acceptable values are: open, private
+	JoinPolicy string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`

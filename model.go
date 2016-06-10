@@ -178,6 +178,17 @@ type ProjectInfo struct {
 	} `json:"details"`
 }
 
+type AccountDetails struct {
+	Success  bool `json:"success"`
+	Projects []struct {
+		Role         string `json:"role"`
+		Name         string `json:"name"`
+		Identifier   string `json:"identifier"`
+		Downloadable int    `json:"downloadable"`
+		Key          string `json:"key"`
+	} `json:"projects"`
+}
+
 type responseGeneral struct {
 	Success bool `json:"success"`
 }

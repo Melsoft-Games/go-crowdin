@@ -13,6 +13,7 @@ import (
 
 var (
 	apiBaseURL = "https://api.crowdin.com/api/project/"
+	apiAccountBaseURL = "https://api.crowdin.com/api/account/"
 )
 
 // Crowdin API wrapper
@@ -52,31 +53,11 @@ func (crowdin *Crowdin) SetDebug(debug bool, logWriter io.Writer) {
 	crowdin.logWriter = logWriter
 }
 
-// GetLanguageStatus - Get the detailed translation progress for specified language.
-// Language codes - https://crowdin.com/page/api/language-codes
-func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguageStatus, error) {
-
-	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
-		map[string]string{
-			"language": languageCode,
-			"json":     "",
-		}, nil)
-
-	if err != nil {
-		crowdin.log(err)
-		return nil, err
-	}
-
-	var responseAPI responseLanguageStatus
-	err = json.Unmarshal(response, &responseAPI)
-	if err != nil {
-		log.Println(string(response))
-		crowdin.log(err)
-		return nil, err
-	}
-
-	return &responseAPI, nil
+// SetClient sets a custom http client. Can be useful in App Engine case.
+func (crowdin *Crowdin) SetClient(client *http.Client) {
+	crowdin.config.client = client
 }
+
 
 // AddFile - Add new file to Crowdin project.
 func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, error) {
@@ -270,6 +251,32 @@ func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 	return responseAPI, nil
 }
 
+// GetLanguageStatus - Get the detailed translation progress for specified language.
+// Language codes - https://crowdin.com/page/api/language-codes
+func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguageStatus, error) {
+
+	response, err := crowdin.post(fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
+		map[string]string{
+			"language": languageCode,
+			"json":     "",
+		}, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI responseLanguageStatus
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
 // GetProjectDetails - Get Crowdin Project details
 func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 
@@ -283,8 +290,6 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 		return nil, err
 	}
 
-	log.Println(string(response))
-
 	var responseAPI ProjectInfo
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
@@ -295,3 +300,88 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 
 	return &responseAPI, nil
 }
+
+//// DownloadTranslations - Download ZIP file with translations. You can choose the language of translation you need or download all of them at once.
+//func (crowdin *Crowdin) DownloadTranslations() (error) {
+//	// TODO
+//}
+//
+//// ExportFile - This method exports single translated files from Crowdin. Additionally, it can be applied to export XLIFF files for offline localization.
+//func (crowdin *Crowdin) ExportFile() (error) {
+//	// TODO
+//}
+//
+//// ExportTranslations - Build ZIP archive with the latest translations. Please note that this method can be invoked only once per 30 minutes (there is no such restriction for organization plans). Also API call will be ignored if there were no changes in the project since previous export. You can see whether ZIP archive with latest translations was actually build by status attribute ("built" or "skipped") returned in response.
+//func (crowdin *Crowdin) ExportTranslations() (error) {
+//	// TODO
+//}
+
+// AccountProjects - Get Crowdin Project details.
+func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*AccountDetails, error) {
+
+	response, err := crowdin.post(fmt.Sprintf(apiAccountBaseURL+"get-projects?account-key=%v", accountKey),
+		map[string]string{
+			"login": loginUsername,
+			"json": "",
+		}, nil)
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	var responseAPI AccountDetails
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		log.Println(string(response))
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
+}
+
+//// CreateProject - Create Crowdin project.
+//func (crowdin *Crowdin) CreateProject() (error) {
+//	// TODO
+//}
+//
+//// EditProject - Edit Crowdin project.
+//func (crowdin *Crowdin) EditProject() (error) {
+//	// TODO
+//}
+//
+//// DeleteProject - Delete Crowdin project with all translations.
+//func (crowdin *Crowdin) DeleteProject() (error) {
+//	// TODO
+//}
+//
+//// AddDirectory - Add directory to Crowdin project.
+//func (crowdin *Crowdin) AddDirectory() (error) {
+//	// TODO
+//}
+//
+//// ChangeDirectory - Rename directory or modify its attributes. When renaming directory the path can not be changed (it means new_name parameter can not contain path, name only).
+//func (crowdin *Crowdin) ChangeDirectory() (error) {
+//	// TODO
+//}
+//
+//// DeleteDirectory - Delete Crowdin project directory. All nested files and directories will be deleted too.
+//func (crowdin *Crowdin) DeleteDirectory() (error) {
+//	// TODO
+//}
+//
+//// DownloadGlossary - Download Crowdin project glossaries as TBX file.
+//func (crowdin *Crowdin) DownloadGlossary() (error) {
+//	// TODO
+//}
+//
+//// UploadGlossary - Upload your glossaries for Crowdin Project in TBX, CSV or XLS/XLSX file formats.
+//func (crowdin *Crowdin) UploadGlossary() (error) {
+//	// TODO
+//}
+//
+//// SupportedLanguages - Get supported languages list with Crowdin codes mapped to locale name and standardized codes.
+//func (crowdin *Crowdin) SupportedLanguages() (error) {
+//	// TODO
+//}

@@ -694,18 +694,3 @@ func (crowdin *Crowdin) DeleteDirectory(directoryName string) (*responseGeneral,
 
 	return &responseAPI, nil
 }
-
-//// DownloadGlossary - Download Crowdin project glossaries as TBX file.
-//func (crowdin *Crowdin) DownloadGlossary() (error) {
-//	// TODO
-//}
-//
-//// UploadGlossary - Upload your glossaries for Crowdin Project in TBX, CSV or XLS/XLSX file formats.
-//func (crowdin *Crowdin) UploadGlossary() (error) {
-//	// TODO
-//}
-//
-//// SupportedLanguages - Get supported languages list with Crowdin codes mapped to locale name and standardized codes.
-//func (crowdin *Crowdin) SupportedLanguages() (error) {
-//	// TODO
-//}

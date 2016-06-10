@@ -1,8 +1,6 @@
 # go-crowdin
 Crowdin API in Go - https://crowdin.com/page/api
 
-> Note: In progress of supporting all API endpoints
-
 #### Install
 
 `go get github.com/medisafe/go-crowdin`
@@ -22,11 +20,21 @@ api := crowdin.New("token", "project-name")
 
 :blue_book: Check the doc - [Documentation](https://godoc.org/github.com/medisafe/go-crowdin)
 
-> Example:
-``` Go
-// get language status
-files, err := api.GetLanguageStatus("ru")
-```
+> Examples:
+> ``` Go
+> // get language status
+> files, err := api.GetLanguageStatus("ru")
+> 
+> // add file
+> result, err := api.AddFile(&crowdin.AddFileOptions{
+>     Type: "csv",
+>     Scheme: "identifier,source_or_translation,context",
+>     FirstLineContainsHeader: true,
+>     Files: map[string]string{
+>         "strings_profile_section.csv" : "local/path/to/strings_profile_section.csv",
+>     },
+> })
+> ```
 
 ##### Debug
 

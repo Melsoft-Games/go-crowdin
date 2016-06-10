@@ -2,6 +2,7 @@ package crowdin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -331,11 +332,39 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 	return &responseAPI, nil
 }
 
-//// DownloadTranslations - Download ZIP file with translations. You can choose the language of translation you need or download all of them at once.
-//func (crowdin *Crowdin) DownloadTranslations() (error) {
-//	// TODO
-//}
-//
+// DownloadTranslations - Download ZIP file with translations. You can choose the language of translation you need or download all of them at once.
+func (crowdin *Crowdin) DownloadTranslations(options *DownloadOptions) error {
+
+	if options == nil || options.Package == "" {
+		return errors.New("Package can't be empty")
+	}
+
+	response, err := crowdin.getResponse(&getOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/download/%v.zip?key=%v", crowdin.config.project, options.Package, crowdin.config.token),
+	})
+
+	defer response.Body.Close()
+
+	if err != nil {
+		crowdin.log(err)
+		return err
+	}
+
+	// create the file
+	out, err := os.Create(options.LocalPath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// writer the body to file
+	_, err = io.Copy(out, response.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // ExportFile - This method exports single translated files from Crowdin. Additionally, it can be applied to export XLIFF files for offline localization.
 func (crowdin *Crowdin) ExportFile(options *ExportFileOptions) error {

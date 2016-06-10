@@ -140,6 +140,14 @@ type ExportFileOptions struct {
 	LocalPath string
 }
 
+type DownloadOptions struct {
+	// Language code or "all" to download a bundle with translations to all languages.
+	Package string
+
+	// Path to the file name that file will be exported to.
+	LocalPath string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`

@@ -129,6 +129,17 @@ type EditProjectOptions struct {
 	JoinPolicy string
 }
 
+type ExportFileOptions struct {
+	// This parameter specifies a path to the file that should be exported from the project.
+	CrowdinFile string
+
+	// Crowdin language code.
+	Language string
+
+	// Path to the file name that file will be exported to.
+	LocalPath string
+}
+
 type responseLanguageStatus struct {
 	Files []struct {
 		ID              string `json:"id"`

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/mreiferson/go-httpclient"
@@ -103,9 +103,11 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, erro
 	})
 
 	if err != nil {
-		log.Println(string(response))
+		crowdin.log(err)
 		return nil, err
 	}
+
+	crowdin.log(string(response))
 
 	var responseAPI responseAddFile
 	err = json.Unmarshal(response, &responseAPI)
@@ -152,9 +154,11 @@ func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseGeneral
 	})
 
 	if err != nil {
-		log.Println(string(response))
+		crowdin.log(err)
 		return nil, err
 	}
+
+	crowdin.log(string(response))
 
 	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
@@ -180,9 +184,11 @@ func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
 	})
 
 	if err != nil {
-		log.Println(string(response))
+		crowdin.log(err)
 		return nil, err
 	}
+
+	crowdin.log(string(response))
 
 	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
@@ -225,9 +231,11 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 	})
 
 	if err != nil {
-		log.Println(string(response))
+		crowdin.log(err)
 		return nil, err
 	}
+
+	crowdin.log(string(response))
 
 	var responseAPI responseUploadTranslation
 	err = json.Unmarshal(response, &responseAPI)
@@ -255,10 +263,11 @@ func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI []TranslationStatus
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -283,10 +292,11 @@ func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguag
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseLanguageStatus
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -309,10 +319,11 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI ProjectInfo
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -325,16 +336,59 @@ func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 //	// TODO
 //}
 //
-//// ExportFile - This method exports single translated files from Crowdin. Additionally, it can be applied to export XLIFF files for offline localization.
-//func (crowdin *Crowdin) ExportFile() (error) {
-//	// TODO
-//}
+
+// ExportFile - This method exports single translated files from Crowdin. Additionally, it can be applied to export XLIFF files for offline localization.
+func (crowdin *Crowdin) ExportFile(options *ExportFileOptions) error {
+
+	params := make(map[string]string)
+
+	if options != nil {
+
+		if options.Language != "" {
+			params["language"] = options.Language
+		}
+
+		if options.CrowdinFile != "" {
+			params["file"] = options.CrowdinFile
+		}
+	}
+
+	response, err := crowdin.getResponse(&getOptions{
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/export-file?key=%v", crowdin.config.project, crowdin.config.token),
+		params: params,
+	})
+
+	defer response.Body.Close()
+
+	if err != nil {
+		crowdin.log(err)
+		return err
+	}
+
+	// create the file
+	out, err := os.Create(options.LocalPath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// writer the body to file
+	_, err = io.Copy(out, response.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // ExportTranslations - Build ZIP archive with the latest translations. Please note that this method can be invoked only once per 30 minutes (there is no such restriction for organization plans). Also API call will be ignored if there were no changes in the project since previous export. You can see whether ZIP archive with latest translations was actually build by status attribute ("built" or "skipped") returned in response.
 func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error) {
 
 	response, err := crowdin.get(&getOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/export?key=%v&json=", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(apiBaseURL+"%v/export?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
+			"json": "",
+		},
 	})
 
 	if err != nil {
@@ -342,10 +396,11 @@ func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseExportTranslations
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -369,10 +424,11 @@ func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*A
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI AccountDetails
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -423,10 +479,11 @@ func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options 
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseManageProject
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -468,10 +525,11 @@ func (crowdin *Crowdin) EditProject(options *EditProjectOptions) (*responseManag
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseManageProject
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -495,10 +553,11 @@ func (crowdin *Crowdin) DeleteProject() (*responseDeleteProject, error) {
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseDeleteProject
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -523,10 +582,11 @@ func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, er
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -565,10 +625,11 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}
@@ -593,10 +654,11 @@ func (crowdin *Crowdin) DeleteDirectory(directoryName string) (*responseGeneral,
 		return nil, err
 	}
 
+	crowdin.log(string(response))
+
 	var responseAPI responseGeneral
 	err = json.Unmarshal(response, &responseAPI)
 	if err != nil {
-		log.Println(string(response))
 		crowdin.log(err)
 		return nil, err
 	}

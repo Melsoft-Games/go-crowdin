@@ -21,6 +21,7 @@ type postOptions struct {
 
 type getOptions struct {
 	urlStr string
+	params map[string]string
 }
 
 // params - extra params
@@ -104,12 +105,7 @@ func (crowdin *Crowdin) post(options *postOptions) ([]byte, error) {
 
 func (crowdin *Crowdin) get(options *getOptions) ([]byte, error) {
 
-	req, err := http.NewRequest("GET", options.urlStr, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := crowdin.config.client.Do(req)
+	response, err := crowdin.getResponse(options)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +121,27 @@ func (crowdin *Crowdin) get(options *getOptions) ([]byte, error) {
 	}
 
 	return bodyResponse, nil
+}
+
+func (crowdin *Crowdin) getResponse(options *getOptions) (*http.Response, error) {
+
+	if options != nil && options.params != nil {
+		for k, v := range options.params {
+			options.urlStr += "&" + k + "=" + v
+		}
+	}
+
+	req, err := http.NewRequest("GET", options.urlStr, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := crowdin.config.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func (crowdin *Crowdin) log(a interface{}) {

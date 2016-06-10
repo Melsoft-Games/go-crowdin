@@ -79,6 +79,7 @@ type UpdateFileOptions struct {
 	Files map[string]string
 }
 
+// UploadTranslationsOptions are options for UploadTranslations api call
 type UploadTranslationsOptions struct {
 	// Target language. With a single call it's possible to upload translations for several files but only into one of the languages.
 	Language string
@@ -90,6 +91,7 @@ type UploadTranslationsOptions struct {
 	ImportDuplicates string
 }
 
+// ChangeDirectoryOptions are options for ChangeDirectory api call
 type ChangeDirectoryOptions struct {
 	// Full directory path that should be modified (e.g. /MainPage/AboutUs).
 	Name string
@@ -101,6 +103,7 @@ type ChangeDirectoryOptions struct {
 	Title string
 }
 
+// CreateProjectOptions are options for CreateProject api call
 type CreateProjectOptions struct {
 	// Project name.
 	Name string
@@ -118,6 +121,7 @@ type CreateProjectOptions struct {
 	JoinPolicy string
 }
 
+// EditProjectOptions are options for EditProject api call
 type EditProjectOptions struct {
 	// Project name.
 	Name string
@@ -129,6 +133,7 @@ type EditProjectOptions struct {
 	JoinPolicy string
 }
 
+// ExportFileOptions are options for ExportFile api call
 type ExportFileOptions struct {
 	// This parameter specifies a path to the file that should be exported from the project.
 	CrowdinFile string
@@ -140,6 +145,7 @@ type ExportFileOptions struct {
 	LocalPath string
 }
 
+// DownloadOptions are options for DownloadTranslations api call
 type DownloadOptions struct {
 	// Language code or "all" to download a bundle with translations to all languages.
 	Package string
@@ -205,6 +211,7 @@ type responseExportTranslations struct {
 	} `json:"success"`
 }
 
+// TranslationStatus is a response struct
 type TranslationStatus struct {
 	Name               string `json:"name"`
 	Code               string `json:"code"`
@@ -218,6 +225,7 @@ type TranslationStatus struct {
 	ApprovedProgress   int    `json:"approved_progress"`
 }
 
+// ProjectInfo is a response struct
 type ProjectInfo struct {
 	Files []struct {
 		Name         string `json:"name"`
@@ -257,6 +265,7 @@ type ProjectInfo struct {
 	} `json:"details"`
 }
 
+// AccountDetails is a response struct
 type AccountDetails struct {
 	Success  bool `json:"success"`
 	Projects []struct {

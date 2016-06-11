@@ -20,10 +20,11 @@ var (
 // Crowdin API wrapper
 type Crowdin struct {
 	config struct {
-		apiBaseURL string
-		token      string
-		project    string
-		client     *http.Client
+		apiBaseURL        string
+		apiAccountBaseURL string
+		token             string
+		project           string
+		client            *http.Client
 	}
 	debug     bool
 	logWriter io.Writer
@@ -40,6 +41,7 @@ func New(token, project string) *Crowdin {
 
 	s := &Crowdin{}
 	s.config.apiBaseURL = apiBaseURL
+	s.config.apiAccountBaseURL = apiAccountBaseURL
 	s.config.token = token
 	s.config.project = project
 	s.config.client = &http.Client{
@@ -98,7 +100,7 @@ func (crowdin *Crowdin) AddFile(options *AddFileOptions) (*responseAddFile, erro
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/add-file?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 		files:  files,
 	})
@@ -149,7 +151,7 @@ func (crowdin *Crowdin) UpdateFile(options *UpdateFileOptions) (*responseGeneral
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/update-file?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/update-file?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 		files:  files,
 	})
@@ -180,7 +182,7 @@ func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
 	params["file"] = fileName
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-file?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/delete-file?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 	})
 
@@ -226,7 +228,7 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/upload-translation?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/upload-translation?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 		files:  files,
 	})
@@ -253,7 +255,7 @@ func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (
 func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/status?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/status?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"json": "",
 		},
@@ -281,7 +283,7 @@ func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguageStatus, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/language-status?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"language": languageCode,
 			"json":     "",
@@ -309,7 +311,7 @@ func (crowdin *Crowdin) GetLanguageStatus(languageCode string) (*responseLanguag
 func (crowdin *Crowdin) GetProjectDetails() (*ProjectInfo, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/info?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/info?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"json": "",
 		},
@@ -340,7 +342,7 @@ func (crowdin *Crowdin) DownloadTranslations(options *DownloadOptions) error {
 	}
 
 	response, err := crowdin.getResponse(&getOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/download/%v.zip?key=%v", crowdin.config.project, options.Package, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/download/%v.zip?key=%v", crowdin.config.project, options.Package, crowdin.config.token),
 	})
 
 	defer response.Body.Close()
@@ -383,7 +385,7 @@ func (crowdin *Crowdin) ExportFile(options *ExportFileOptions) error {
 	}
 
 	response, err := crowdin.getResponse(&getOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/export-file?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/export-file?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 	})
 
@@ -414,7 +416,7 @@ func (crowdin *Crowdin) ExportFile(options *ExportFileOptions) error {
 func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error) {
 
 	response, err := crowdin.get(&getOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/export?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/export?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"json": "",
 		},
@@ -441,7 +443,7 @@ func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error
 func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*AccountDetails, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiAccountBaseURL+"get-projects?account-key=%v", accountKey),
+		urlStr: fmt.Sprintf(crowdin.config.apiAccountBaseURL+"get-projects?account-key=%v", accountKey),
 		params: map[string]string{
 			"login": loginUsername,
 			"json":  "",
@@ -498,7 +500,7 @@ func (crowdin *Crowdin) CreateProject(accountKey, loginUsername string, options 
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr:      fmt.Sprintf(apiAccountBaseURL+"create-project?account-key=%v", accountKey),
+		urlStr:      fmt.Sprintf(crowdin.config.apiAccountBaseURL+"create-project?account-key=%v", accountKey),
 		params:      params,
 		paramsArray: paramsArray,
 	})
@@ -544,7 +546,7 @@ func (crowdin *Crowdin) EditProject(options *EditProjectOptions) (*responseManag
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr:      fmt.Sprintf(apiBaseURL+"%v/edit-project?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr:      fmt.Sprintf(crowdin.config.apiBaseURL+"%v/edit-project?key=%v", crowdin.config.project, crowdin.config.token),
 		params:      params,
 		paramsArray: paramsArray,
 	})
@@ -573,7 +575,7 @@ func (crowdin *Crowdin) DeleteProject() (*responseDeleteProject, error) {
 	params["json"] = ""
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-project?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/delete-project?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 	})
 
@@ -599,7 +601,7 @@ func (crowdin *Crowdin) DeleteProject() (*responseDeleteProject, error) {
 func (crowdin *Crowdin) AddDirectory(directoryName string) (*responseGeneral, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/add-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/add-directory?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"name": directoryName,
 			"json": "",
@@ -645,7 +647,7 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 	}
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/change-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/change-directory?key=%v", crowdin.config.project, crowdin.config.token),
 		params: params,
 	})
 
@@ -671,7 +673,7 @@ func (crowdin *Crowdin) ChangeDirectory(options *ChangeDirectoryOptions) (*respo
 func (crowdin *Crowdin) DeleteDirectory(directoryName string) (*responseGeneral, error) {
 
 	response, err := crowdin.post(&postOptions{
-		urlStr: fmt.Sprintf(apiBaseURL+"%v/delete-directory?key=%v", crowdin.config.project, crowdin.config.token),
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/delete-directory?key=%v", crowdin.config.project, crowdin.config.token),
 		params: map[string]string{
 			"name": directoryName,
 			"json": "",

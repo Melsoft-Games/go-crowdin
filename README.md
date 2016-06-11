@@ -1,7 +1,7 @@
 # go-crowdin
 Crowdin API in Go - https://crowdin.com/page/api
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/medisafe/go-crowdin)](https://goreportcard.com/report/github.com/medisafe/go-crowdin)   
+[![Go Report Card](https://goreportcard.com/badge/github.com/medisafe/go-crowdin)](https://goreportcard.com/report/github.com/medisafe/go-crowdin) [![Documentation](https://img.shields.io/badge/godoc-reference-5272B4.svg)](https://godoc.org/github.com/medisafe/go-crowdin)  
 
 #### Install
 

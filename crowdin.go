@@ -202,7 +202,7 @@ func (crowdin *Crowdin) DeleteFile(fileName string) (*responseGeneral, error) {
 
 }
 
-// UpdateFile - Upload latest version of your localization file to Crowdin
+// UploadTranslations - Upload latest version of your localization file to Crowdin
 func (crowdin *Crowdin) UploadTranslations(options *UploadTranslationsOptions) (*responseUploadTranslation, error) {
 
 	params := make(map[string]string)
@@ -437,7 +437,7 @@ func (crowdin *Crowdin) ExportTranslations() (*responseExportTranslations, error
 	return &responseAPI, nil
 }
 
-// AccountProjects - Get Crowdin Project details.
+// GetAccountProjects - Get Crowdin Project details.
 func (crowdin *Crowdin) GetAccountProjects(accountKey, loginUsername string) (*AccountDetails, error) {
 
 	response, err := crowdin.post(&postOptions{

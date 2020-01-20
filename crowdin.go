@@ -276,6 +276,33 @@ func (crowdin *Crowdin) GetTranslationsStatus() ([]TranslationStatus, error) {
 	}
 
 	return responseAPI, nil
+} // GetTranslationsStatus - Track overall translation and proofreading progresses of each target language
+
+// GetExportStatus - Get the status of translations export
+func (crowdin *Crowdin) GetExportStatus() (*ExportStatus, error) {
+
+	response, err := crowdin.post(&postOptions{
+		urlStr: fmt.Sprintf(crowdin.config.apiBaseURL+"%v/export-status?key=%v", crowdin.config.project, crowdin.config.token),
+		params: map[string]string{
+			"json": "",
+		},
+	})
+
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	crowdin.log(string(response))
+
+	var responseAPI ExportStatus
+	err = json.Unmarshal(response, &responseAPI)
+	if err != nil {
+		crowdin.log(err)
+		return nil, err
+	}
+
+	return &responseAPI, nil
 }
 
 // GetLanguageStatus - Get the detailed translation progress for specified language.

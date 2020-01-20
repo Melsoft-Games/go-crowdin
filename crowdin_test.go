@@ -1,8 +1,8 @@
 package crowdin
 
 import (
-	"testing"
 	"net/http"
+	"testing"
 )
 
 func TestNew_setToken(t *testing.T) {

@@ -225,6 +225,17 @@ type TranslationStatus struct {
 	ApprovedProgress   int    `json:"approved_progress"`
 }
 
+// ExportStatus is a response struct
+type ExportStatus struct {
+	Status          string `json:"status"`
+	Progress        int    `json:"progress"`
+	LastBuild       string `json:"last_build"`
+	Code            string `json:"code"`
+	Message         string `json:"message"`
+	CurrentFile     string `json:"current_file"`
+	CurrentLanguage string `json:"current_language"`
+}
+
 // ProjectInfo is a response struct
 type ProjectInfo struct {
 	Files []struct {
